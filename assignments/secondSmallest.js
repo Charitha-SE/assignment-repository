@@ -1,5 +1,5 @@
 
-// inbuilt method
+
 let num = [2,6,9,11,76,55];
 num.sort((a,b) => a-b);
 console.log(num);
