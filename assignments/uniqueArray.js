@@ -1,10 +1,16 @@
-function removeDuplicates(arr) {
-    let uniqueSet = new Set(arr);
-    return Array.from(uniqueSet);
+const prompt = require('prompt-sync')();
+
+function uniqueArray(array) {
+    let result = [];
+    for (let i = 0; i < array.length; i++) {
+        if (!result.includes(array[i])) {
+            result.push(array[i]);
+        }
+    }
+    return result;
 }
 
-let numbers = [1, 2, 2, 3, 4, 4, 5, 6, 6, 7];
-console.log(removeDuplicates(numbers));
-
-
-
+let input = prompt("Enter numbers separated by commas: ");
+let numbers = input.split(',').map(num => num.trim());
+numbers = numbers.map(Number);
+console.log("Unique numbers:", uniqueArray(numbers));
