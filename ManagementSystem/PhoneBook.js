@@ -1,15 +1,18 @@
 const fs = require('fs');
-const { ContactNotFoundError, PhoneBookError } = require('./Errors');
-const { PersonalContact, BusinessContact } = require('./Contact');
+const PersonalContact = require('./PersonalContact');
+const BusinessContact = require('./BusinessContact');
+const { ContactNotFoundError, FileSystemError } = require('./Errors');
 
 class PhoneBook {
     constructor() {
         this.contacts = [];
+        this.loadContactsFromFile();
     }
 
     addContact(contact) {
         this.contacts.push(contact);
         console.log("Contact created successfully.");
+        this.saveContactsToFile();
     }
 
     updateContact(name, newContact) {
@@ -17,6 +20,7 @@ class PhoneBook {
         if (index !== -1) {
             this.contacts[index] = newContact;
             console.log("Contact updated successfully.");
+            this.saveContactsToFile();
         } else {
             throw new ContactNotFoundError(`Contact name "${name}" not found.`);
         }
@@ -27,6 +31,7 @@ class PhoneBook {
         if (index !== -1) {
             this.contacts.splice(index, 1);
             console.log("Contact deleted successfully.");
+            this.saveContactsToFile();
         } else {
             throw new ContactNotFoundError(`Contact name "${name}" not found.`);
         }
@@ -42,35 +47,42 @@ class PhoneBook {
 
     loadContactsFromFile() {
         try {
+            if (!fs.existsSync('contacts.txt')) {
+                console.log("File 'contacts.txt' not found. Created a new file.");
+                fs.writeFileSync('contacts.txt', '', 'utf8');
+            }
             const data = fs.readFileSync('contacts.txt', 'utf8');
-            const lines = data.split('\n');
-            for (let line of lines) {
-                if (line) {
-                    const [type, name, phoneNumber, extra] = line.split(',');
+            const lines = data.trim().split('\n');
+            for (const line of lines) {
+                const [type, name, phoneNumber, extra] = line.split(',');
+                const existingContact = this.contacts.find(contact => contact.name === name);
+                if (!existingContact) {
                     if (type.toLowerCase() === 'personal') {
-                        this.addContact(new PersonalContact(name, phoneNumber, extra));
+                        const personalContact = new PersonalContact(name, phoneNumber, extra);
+                        this.contacts.push(personalContact);
                     } else if (type.toLowerCase() === 'business') {
-                        this.addContact(new BusinessContact(name, phoneNumber, extra));
+                        const businessContact = new BusinessContact(name, phoneNumber, extra);
+                        this.contacts.push(businessContact);
                     }
                 }
             }
         } catch (err) {
-            throw new PhoneBookError("Failed to read contacts.");
+            throw new FileSystemError("Failed to read contacts.");
         }
     }
 
     saveContactsToFile() {
         try {
-            const data = this.contacts.map(contact => {
+            const newData = this.contacts.map(contact => {
                 if (contact instanceof PersonalContact) {
                     return `Personal,${contact.name},${contact.phoneNumber},${contact.email}`;
                 } else if (contact instanceof BusinessContact) {
                     return `Business,${contact.name},${contact.phoneNumber},${contact.company}`;
                 }
-            }).join('\n');
-            fs.writeFileSync('contacts.txt', data, 'utf8');
+            }).join('\n') + '\n';
+            fs.writeFileSync('contacts.txt', newData, 'utf8');
         } catch (err) {
-            throw new PhoneBookError("Failed to save contacts to file.");
+            throw new FileSystemError("Failed to save contacts to file.");
         }
     }
 }

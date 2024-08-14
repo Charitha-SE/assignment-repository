@@ -6,11 +6,11 @@ class ContactNotFoundError extends Error {
     }
 }
 
-class PhoneBookError extends Error {
+class FileSystemError extends Error {
     constructor(message) {
         super(message);
-        this.name = "PhoneBookError";
+        this.name = "FileSystemError";
     }
 }
 
-module.exports = { ContactNotFoundError, PhoneBookError };
+module.exports = { ContactNotFoundError,  FileSystemError };
