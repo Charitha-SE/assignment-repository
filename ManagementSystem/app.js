@@ -1,14 +1,102 @@
+const PhoneBook = require('./PhoneBook');
+const PersonalContact = require('./PersonalContact');
+const BusinessContact = require('./BusinessContact');
+const { ContactNotFoundError, FileSystemError } = require('./Errors');
+const {
+    promptForValidPhoneNumber,
+    promptForValidEmail,
+    promptForValidType,
+    promptForUniqueName
+} = require('./UserInputs');
+
 const prompt = require('prompt-sync')();
-const { 
-    isValidPhoneNumber, 
-    addContact, 
-    updateContact, 
-    deleteContact, 
-    displayContacts, 
-    saveAndExit } = require('./ContactManager');
+
+const phoneBook = new PhoneBook();
+
+function handleErrors(error) {
+    if (error instanceof ContactNotFoundError) {
+        console.error("Contact error:", error.message);
+    } else if (error instanceof FileSystemError) {
+        console.error("FileSystem Error:", error.message);
+    } else {
+        console.error("An unexpected error occurred:", error.message);
+    }
+}
+
+const Actions = {
+    addContact: () => {
+        const type = promptForValidType();
+        const name = promptForUniqueName('', phoneBook);
+        const phone = promptForValidPhoneNumber();
+
+        let contact;
+        if (type === 'personal') {
+            const email = promptForValidEmail();
+            contact = new PersonalContact(name, phone, email);
+        } else {
+            const company = prompt("Enter company: ");
+            contact = new BusinessContact(name, phone, company);
+        }
+
+        try {
+            phoneBook.addContact(contact);
+            console.log("Contact added successfully.");
+        } catch (error) {
+            handleErrors(error);
+        }
+    },
+    updateContact: () => {
+        const name = prompt("Enter the name of the contact to update: ");
+
+        if (!phoneBook.isContactExists(name)) {
+            console.log("No contact found with this name.");
+            return;
+        }
+
+        const type = promptForValidType();
+        const newName = promptForUniqueName(name, phoneBook);
+        const newPhone = promptForValidPhoneNumber();
+
+        let newContact;
+        if (type === 'personal') {
+            const email = promptForValidEmail();
+            newContact = new PersonalContact(newName, newPhone, email);
+        } else {
+            const company = prompt("Enter new company: ");
+            newContact = new BusinessContact(newName, newPhone, company);
+        }
+
+        try {
+            phoneBook.updateContact(name, newContact);
+            console.log("Contact updated successfully.");
+        } catch (error) {
+            handleErrors(error);
+        }
+    },
+    deleteContact: () => {
+        const name = prompt("Enter the name of the contact to delete: ");
+        try {
+            phoneBook.deleteContact(name);
+            console.log("Contact deleted successfully.");
+        } catch (error) {
+            handleErrors(error);
+        }
+    },
+    displayContacts: () => {
+        phoneBook.displayContacts();
+    },
+    saveAndExit: () => {
+        try {
+            phoneBook.saveContactsToFile();
+            console.log("Contacts saved successfully.");
+        } catch (err) {
+            console.error("An error occurred while saving contacts:", err.message);
+        }
+    }
+};
 
 while (true) {
-    console.log("\nPhone Book Management System");
+    console.log("\n--- Phone Book Management System ---");
     console.log("1. Add Contact");
     console.log("2. Update Contact");
     console.log("3. Delete Contact");
@@ -18,55 +106,20 @@ while (true) {
     const choice = prompt("Enter your choice: ");
 
     switch (choice) {
-        case '1': {
-            const type = prompt("Enter type (Personal/Business): ").toLowerCase();
-            const name = prompt("Enter name: ");
-            let phone = prompt("Enter phone: ");
-
-            while (!isValidPhoneNumber(phone)) {
-                console.log("Invalid phone number. Please enter only 10 digits.");
-                phone = prompt("Enter phone: ");
-            }
-
-            if (type === 'personal') {
-                const email = prompt("Enter email: ");
-                addContact(type, name, phone, email);
-            } else if (type === 'business') {
-                const company = prompt("Enter company: ");
-                addContact(type, name, phone, company);
-            }
+        case '1':
+            Actions.addContact();
             break;
-        }
-        case '2': {
-            const name = prompt("Enter the name of the contact to update: ");
-            const type = prompt("Enter new type (Personal/Business): ").toLowerCase();
-            const newName = prompt("Enter new name: ");
-            let newPhone = prompt("Enter new phone: ");
-
-            while (!isValidPhoneNumber(newPhone)) {
-                console.log("Invalid phone number. Please enter only 10 digits.");
-                newPhone = prompt("Enter new phone: ");
-            }
-
-            if (type === 'personal') {
-                const email = prompt("Enter new email: ");
-                updateContact(name, type, newName, newPhone, email);
-            } else if (type === 'business') {
-                const company = prompt("Enter new company: ");
-                updateContact(name, type, newName, newPhone, company);
-            }
+        case '2':
+            Actions.updateContact();
             break;
-        }
-        case '3': {
-            const name = prompt("Enter the name of the contact to delete: ");
-            deleteContact(name);
+        case '3':
+            Actions.deleteContact();
             break;
-        }
         case '4':
-            displayContacts();
+            Actions.displayContacts();
             break;
         case '5':
-            saveAndExit();
+            Actions.saveAndExit();
             return;
         default:
             console.log("Please select from the above options.");

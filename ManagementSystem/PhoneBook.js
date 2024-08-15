@@ -3,6 +3,8 @@ const PersonalContact = require('./PersonalContact');
 const BusinessContact = require('./BusinessContact');
 const { ContactNotFoundError, FileSystemError } = require('./Errors');
 
+const fileName = 'contacts.txt';
+
 class PhoneBook {
     constructor() {
         this.contacts = [];
@@ -11,7 +13,6 @@ class PhoneBook {
 
     addContact(contact) {
         this.contacts.push(contact);
-        console.log("Contact created successfully.");
         this.saveContactsToFile();
     }
 
@@ -19,7 +20,6 @@ class PhoneBook {
         const index = this.contacts.findIndex(contact => contact.name === name);
         if (index !== -1) {
             this.contacts[index] = newContact;
-            console.log("Contact updated successfully.");
             this.saveContactsToFile();
         } else {
             throw new ContactNotFoundError(`Contact name "${name}" not found.`);
@@ -30,7 +30,6 @@ class PhoneBook {
         const index = this.contacts.findIndex(contact => contact.name === name);
         if (index !== -1) {
             this.contacts.splice(index, 1);
-            console.log("Contact deleted successfully.");
             this.saveContactsToFile();
         } else {
             throw new ContactNotFoundError(`Contact name "${name}" not found.`);
@@ -47,11 +46,11 @@ class PhoneBook {
 
     loadContactsFromFile() {
         try {
-            if (!fs.existsSync('contacts.txt')) {
-                console.log("File 'contacts.txt' not found. Created a new file.");
-                fs.writeFileSync('contacts.txt', '', 'utf8');
+            if (!fs.existsSync(fileName)) {
+                fs.writeFileSync(fileName, '', 'utf8');
+                console.log(`File '${fileName}' not found. Created a new file.`);
             }
-            const data = fs.readFileSync('contacts.txt', 'utf8');
+            const data = fs.readFileSync(fileName, 'utf8');
             const lines = data.trim().split('\n');
             for (const line of lines) {
                 const [type, name, phoneNumber, extra] = line.split(',');
@@ -80,10 +79,14 @@ class PhoneBook {
                     return `Business,${contact.name},${contact.phoneNumber},${contact.company}`;
                 }
             }).join('\n') + '\n';
-            fs.writeFileSync('contacts.txt', newData, 'utf8');
+            fs.writeFileSync(fileName, newData, 'utf8');
         } catch (err) {
             throw new FileSystemError("Failed to save contacts to file.");
         }
+    }
+
+    isContactExists(name) {
+        return this.contacts.some(contact => contact.name === name);
     }
 }
 
