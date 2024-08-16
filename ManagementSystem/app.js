@@ -24,7 +24,7 @@ function handleErrors(error) {
 }
 
 const Actions = {
-    addContact: () => {
+    addContact() {
         const type = promptForValidType();
         const name = promptForUniqueName('', phoneBook);
         const phone = promptForValidPhoneNumber();
@@ -45,12 +45,11 @@ const Actions = {
             handleErrors(error);
         }
     },
-    updateContact: () => {
-        const name = prompt("Enter the name of the contact to update: ");
-
-        if (!phoneBook.isContactExists(name)) {
+    updateContact() {
+        let name = prompt("Enter the name of the contact to update: ");
+        while (!phoneBook.isContactExists(name)) {
             console.log("No contact found with this name.");
-            return;
+            name = prompt("Please enter another name: ");
         }
 
         const type = promptForValidType();
@@ -73,7 +72,7 @@ const Actions = {
             handleErrors(error);
         }
     },
-    deleteContact: () => {
+    deleteContact() {
         const name = prompt("Enter the name of the contact to delete: ");
         try {
             phoneBook.deleteContact(name);
@@ -82,16 +81,8 @@ const Actions = {
             handleErrors(error);
         }
     },
-    displayContacts: () => {
+    displayContacts() {
         phoneBook.displayContacts();
-    },
-    saveAndExit: () => {
-        try {
-            phoneBook.saveContactsToFile();
-            console.log("Contacts saved successfully.");
-        } catch (err) {
-            console.error("An error occurred while saving contacts:", err.message);
-        }
     }
 };
 
@@ -101,7 +92,7 @@ while (true) {
     console.log("2. Update Contact");
     console.log("3. Delete Contact");
     console.log("4. Display Contacts");
-    console.log("5. Save and Exit");
+    console.log("5. Exit");
 
     const choice = prompt("Enter your choice: ");
 
@@ -119,7 +110,7 @@ while (true) {
             Actions.displayContacts();
             break;
         case '5':
-            Actions.saveAndExit();
+            console.log("Exiting!");
             return;
         default:
             console.log("Please select from the above options.");
