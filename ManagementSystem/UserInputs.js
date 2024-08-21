@@ -1,4 +1,3 @@
-// UserInputs.js
 const prompt = require('prompt-sync')();
 
 function promptForValidPhoneNumber() {

@@ -13,14 +13,14 @@ class PhoneBook {
 
     addContact(contact) {
         this.contacts.push(contact);
-        this.saveContactsToFile();
+        this.updateFileWithContacts();
     }
 
     updateContact(name, newContact) {
         const index = this.contacts.findIndex(contact => contact.name === name);
         if (index !== -1) {
             this.contacts[index] = newContact;
-            this.saveContactsToFile();
+            this.updateFileWithContacts();
         } else {
             throw new ContactNotFoundError(`Contact name "${name}" not found.`);
         }
@@ -30,7 +30,7 @@ class PhoneBook {
         const index = this.contacts.findIndex(contact => contact.name === name);
         if (index !== -1) {
             this.contacts.splice(index, 1);
-            this.saveContactsToFile();
+            this.updateFileWithContacts();
         } else {
             throw new ContactNotFoundError(`Contact name "${name}" not found.`);
         }
@@ -70,7 +70,7 @@ class PhoneBook {
         }
     }
 
-    saveContactsToFile() {
+    updateFileWithContacts() {
         try {
             const newData = this.contacts.map(contact => {
                 if (contact instanceof PersonalContact) {
