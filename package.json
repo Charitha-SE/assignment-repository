@@ -1,0 +1,27 @@
+{
+  "name": "assignment-repository",
+  "version": "1.0.0",
+  "description": "assignment",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Charitha-SE/assignment-repository.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Charitha-SE/assignment-repository/issues"
+  },
+  "homepage": "https://github.com/Charitha-SE/assignment-repository#readme",
+  "devDependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^22.5.4"
+  },
+  "dependencies": {
+    "faker": "^5.5.3",
+    "luxon": "^3.5.0"
+  }
+}
