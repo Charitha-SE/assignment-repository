@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { createRecord, getList,updateRecord,deleteRecord } = require('../helpers/requestMethods.js');
-const { EndPoints } = require('../Constants/EndPoint.js');
-const{ Data } = require('../test-data/payloadBody.js');
+const { createRecord, getAllRecords,updateRecord,deleteRecord } = require('../helpers/requestMethods.js');
+const { getApiEndPoints } = require('../Constants/EndPoint.js');
+const{ Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 
-const endPoints = EndPoints();
+const endPoints = getApiEndPoints();
 
 test('Validate the users list getting successfully', async ({ request }) => {
-    const response = await getList(request, endPoints.users);
+    const response = await getAllRecords(request, endPoints.users);
 
     expect(response.status()).toBe(200);
     expect(response.ok()).toBeTruthy();
@@ -30,7 +30,7 @@ test('Validate the User is cretaed succsessfully', async ({ request }) => {
 });
 
 test('Validate the User is not cretaed succsessfully', async ({ request }) => {
-    const testeDatas = [
+    const testDatas = [
         {
             "id": "",
             "userName": "",
@@ -43,7 +43,7 @@ test('Validate the User is not cretaed succsessfully', async ({ request }) => {
         }
 
     ];
-        for (const data of testeDatas) {
+        for (const data of testDatas) {
         const postAPIResponse = await createRecord(request, data, endPoints.users);
 
         expect(await postAPIResponse.status()).toBe(400);
@@ -91,7 +91,7 @@ test('Validate the User record is deleted succsessfully', async ({ request }) =>
     expect(deleteResponse.ok()).toBeTruthy();
 
 
-    const getResponse = await getList(request, `${endPoints.users}/${userId}`);
+    const getResponse = await getAllRecords(request, `${endPoints.users}/${userId}`);
     expect(getResponse.status()).toBe(404);
 
 });

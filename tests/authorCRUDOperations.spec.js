@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { createRecord, getList, updateRecord, deleteRecord } = require('../helpers/requestMethods.js');
-const { EndPoints } = require('../Constants/EndPoint.js');
-const { Data } = require('../test-data/payloadBody.js');
+const { createRecord, getAllRecords, updateRecord, deleteRecord } = require('../helpers/requestMethods.js');
+const { getApiEndPoints } = require('../Constants/EndPoint.js');
+const { Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 
-const endPoints = EndPoints();
+const endPoints = getApiEndPoints();
 
 test('Validate the authors list getting successfully', async ({ request }) => {
-    const response = await getList(request, endPoints.authors);
+    const response = await getAllRecords(request, endPoints.authors);
 
     expect(response.status()).toBe(200);
     expect(response.ok()).toBeTruthy();
@@ -29,7 +29,7 @@ test('Validate the author is cretaed succsessfully', async ({ request }) => {
     expect(postAPIResponseBody).toHaveProperty("lastName", postData.lastName);
 });
 test('Validate the author is not cretaed succsessfully', async ({ request }) => {
-    const testeDatas = [
+    const testDatas = [
         {
             "id": "",
             "idBook": "",
@@ -43,7 +43,7 @@ test('Validate the author is not cretaed succsessfully', async ({ request }) => 
             "lastName": ""
         }
     ];
-        for (const data of testeDatas) {
+        for (const data of testDatas) {
         const postAPIResponse = await createRecord(request, data, endPoints.authors);
 
         expect(await postAPIResponse.status()).toBe(400);

@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { createRecord, getList, updateRecord, deleteRecord } = require('../helpers/requestMethods.js');
-const { EndPoints } = require('../Constants/EndPoint.js');
-const{ Data } = require('../test-data/payloadBody.js');
+const { createRecord, getAllRecords, updateRecord, deleteRecord } = require('../helpers/requestMethods.js');
+const { getApiEndPoints } = require('../Constants/EndPoint.js');
+const{ Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 
-const endPoints = EndPoints();
+const endPoints = getApiEndPoints();
 
 test('Validate the coverphotos list getting successfully', async ({ request }) => {
-    const response = await getList(request, endPoints.coverPhotos);
+    const response = await getAllRecords(request, endPoints.coverPhotos);
 
     expect(response.status()).toBe(200);
     expect(response.ok()).toBeTruthy();
@@ -29,7 +29,7 @@ test('Validate the CoverPhoto is cretaed succsessfully', async ({ request }) => 
 });
 
 test('Validate the CoverPhoto is not cretaed succsessfully', async ({ request }) => {
-    const testeDatas = [
+    const testDatas = [
         {
             "id": "",
             "idBook": "",
@@ -47,7 +47,7 @@ test('Validate the CoverPhoto is not cretaed succsessfully', async ({ request })
         }
 
     ];
-        for (const data of testeDatas) {
+        for (const data of testDatas) {
         const postAPIResponse = await createRecord(request, data, endPoints.coverPhotos);
 
         expect(await postAPIResponse.status()).toBe(400);

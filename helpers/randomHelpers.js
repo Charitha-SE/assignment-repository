@@ -6,7 +6,7 @@ class RandomDataGenerator {
   }
 
   static generateTitle() {
-    return `${faker.lorem.word()}`;
+    return faker.lorem.word();
   }
 
   static generateIdBook() {
@@ -23,7 +23,8 @@ class RandomDataGenerator {
 
   static generateDescription() {
     return faker.lorem.words(5);
-  }  
+  }
+
   static generateExcerpt() {
     return faker.lorem.words(5);
   }
@@ -31,9 +32,10 @@ class RandomDataGenerator {
   static generatePageCount() {
     return faker.number.int({ min: 100, max: 500 });
   }
+
   static generateUserName() {
     return faker.internet.userName();
-}
+  }
 
   static generatePassword() {
     return faker.internet.password();

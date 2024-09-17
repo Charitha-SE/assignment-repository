@@ -1,8 +1,8 @@
-const { EndPoints } = require('../Constants/EndPoint');
+const { getApiEndPoints } = require('../Constants/EndPoint');
 
-const endPoints = EndPoints();
+const endPoints = getApiEndPoints();
 
-async function getList(requestContext, endpoint) {
+async function getAllRecords(requestContext, endpoint) {
     const response = await requestContext.get(endpoint, {});
     return response;
 }
@@ -27,4 +27,4 @@ async function deleteRecord(requestContext, id, endpoint) {
     return response;
 }
 
-module.exports = { createRecord, getList,updateRecord,deleteRecord };
+module.exports = { createRecord, getAllRecords,updateRecord,deleteRecord };

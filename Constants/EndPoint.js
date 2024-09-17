@@ -1,7 +1,7 @@
 const { use } = require("../playwright.config");
 
 
-function EndPoints() {
+function  getApiEndPoints() {
     const activitiesEndPoint = use.baseURL+'/Activities';
     const authorsEndPoint = use.baseURL+'/Authors';
     const booksEndPoint = use.baseURL+'/Books';
@@ -17,4 +17,4 @@ function EndPoints() {
     };
 }
 
-module.exports = { EndPoints };
+module.exports = { getApiEndPoints };
