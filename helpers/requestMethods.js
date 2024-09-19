@@ -1,7 +1,3 @@
-const { getApiEndPoints } = require('../Constants/EndPoint');
-
-const endPoints = getApiEndPoints();
-
 async function getAllRecords(requestContext, endpoint) {
     const response = await requestContext.get(endpoint, {});
     return response;
