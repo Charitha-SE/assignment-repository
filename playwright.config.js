@@ -9,7 +9,7 @@ module.exports = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'https://fakerestapi.azurewebsites.net/api/v1',
+    // baseURL: 'https://fakerestapi.azurewebsites.net/api/v1',
     trace: 'on-first-retry',
   },
   projects: [
