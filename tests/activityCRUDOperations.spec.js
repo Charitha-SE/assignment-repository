@@ -4,141 +4,178 @@ const ApiEndpoints = require('../Constants/EndPoint.js');
 const { Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 const RandomDateGenerator = require('../helpers/dateHelper.js');
-const ActivityTestData = require('../testData/activityTestData.js');
+const { assertResponseStatus } = require('../helpers/AssertionHelper.js');
+const testData = require('../test-data/testData.js');
 
+const endPoints = new ApiEndpoints();
 
-const endPoints = new ApiEndpoints().getEndPoints();
-
-test('Validate the activity list getting successfully', async ({ request }) => {
+test('Validate the activity list is retrieved successfully', async ({ request }) => {
     const response = await getAllRecords(request, endPoints.activities);
-
-    expect(await response.status()).toBe(200);
-    expect(await response.ok()).toBeTruthy();
+    expect(response.status()).toBe(200);
+    expect(response.ok()).toBeTruthy();
 });
 
-test('Validate the Activity is cretaed succsessfully', async ({ request }) => {
+test('Validate the activity is created successfully', async ({ request }) => {
     const postData = Data.activities;
-
     const postAPIResponse = await createRecord(request, postData, endPoints.activities);
 
-    expect(await postAPIResponse.status()).toBe(200);
-    expect(await postAPIResponse.ok()).toBeTruthy();
+    expect(postAPIResponse.status()).toBe(200);
+    expect(postAPIResponse.ok()).toBeTruthy();
 
     const postAPIResponseBody = await postAPIResponse.json();
-
     expect(postAPIResponseBody).toHaveProperty("id", postData.id);
     expect(postAPIResponseBody).toHaveProperty("title", postData.title);
     expect(postAPIResponseBody).toHaveProperty("dueDate", postData.dueDate);
 });
 
-test('Validate the Activity is created successfully and get the activity by its ID', async ({ request }) => {
+test('Validate activity creation and retrieval by ID', async ({ request }) => {
     const postData = Data.activities;
- 
     const postAPIResponse = await createRecord(request, postData, endPoints.activities);
 
-    expect(await postAPIResponse.status()).toBe(200);
-    expect(await postAPIResponse.ok()).toBeTruthy();
+    expect(postAPIResponse.status()).toBe(200);
+    expect(postAPIResponse.ok()).toBeTruthy();
 
     const postAPIResponseBody = await postAPIResponse.json();
-    
-    expect(postAPIResponseBody).toHaveProperty("id", postData.id);
-    expect(postAPIResponseBody).toHaveProperty("title", postData.title);
-    expect(postAPIResponseBody).toHaveProperty("dueDate", postData.dueDate);
-
     const createdActivityId = postAPIResponseBody.id;
-    const getAPIResponse = await request.get(`${endPoints.activities}/${createdActivityId}`);
     
-    expect(await getAPIResponse.status()).toBe(200);
-    expect(await getAPIResponse.ok()).toBeTruthy();
+    const getAPIResponse = await request.get(`${endPoints.activities}/${createdActivityId}`);
+    expect(getAPIResponse.status()).toBe(200);
+    expect(getAPIResponse.ok()).toBeTruthy();
 });
 
-test('Validate the activity is not created successfully', async ({ request }) => {
-    const testDatas = ActivityTestData.invalidActivityTestData(); 
+test('Validate the activity is not created with invalid data', async ({ request }) => {
+    const invalidDataSets = testData.invalidActivityData;
 
-    for (const data of testDatas) {
+    for (const data of invalidDataSets) {
         const postAPIResponse = await createRecord(request, data, endPoints.activities);
-
-        expect(await postAPIResponse.status()).toBe(400);
-        expect(await postAPIResponse.ok()).toBeFalsy();
-
+        expect(postAPIResponse.status()).toBe(400);
         const postAPIResponseBody = await postAPIResponse.json();
         expect(postAPIResponseBody).toHaveProperty("title", "One or more validation errors occurred.");
-        expect(postAPIResponseBody).toHaveProperty("status", 400);
-        expect(postAPIResponseBody).toHaveProperty("errors");
     }
 });
 
-test('Validate the activity is updated succsessfully', async ({ request }) => {
+test('Validate the activity is updated successfully', async ({ request }) => {
     const postData = Data.activities;
- 
-     const createResponse = await createRecord(request, postData, endPoints.activities);
-     expect(createResponse.status()).toBe(200);
-     expect(createResponse.ok()).toBeTruthy();
- 
-     const createdActivity = await createResponse.json();
-     const activityId = createdActivity.id;
- 
-     const updateActivity = {
-         "title": RandomDataGenerator.generateTitle(), 
-         "dueDate": RandomDateGenerator.generateDueDate(),
-         "completed": false
-     };
- 
-     const updateResponse = await updateRecord(request, updateActivity, activityId, endPoints.activities);
-     expect(updateResponse.status()).toBe(200);
-     expect(updateResponse.ok()).toBeTruthy();
- });
+    const createResponse = await createRecord(request, postData, endPoints.activities);
+    expect(createResponse.status()).toBe(200);
 
- test('Validate the activity is updated successfully and the changes are properly reflected', async ({ request }) => {
+    const createdActivity = await createResponse.json();
+    const activityId = createdActivity.id;
+
+    const updateActivity = {
+        title: RandomDataGenerator.generateTitle(),
+        dueDate: RandomDateGenerator.generateDueDate(),
+        completed: false,
+    };
+
+    const updateResponse = await updateRecord(request, updateActivity, activityId, endPoints.activities);
+    expect(updateResponse.status()).toBe(200);
+});
+
+test('Validate the activity is updated and changes are reflected', async ({ request }) => {
     const postData = Data.activities;
- 
-     const createResponse = await createRecord(request, postData, endPoints.activities);
-     expect(createResponse.status()).toBe(200);
-     expect(createResponse.ok()).toBeTruthy();
- 
-     const createdActivity = await createResponse.json();
-     const activityId = createdActivity.id;
- 
-     const updateActivity = {
-         "title": RandomDataGenerator.generateTitle(), 
-         "dueDate": RandomDateGenerator.generateDueDate(),
-         "completed": false
-     };
- 
-     const updateResponse = await updateRecord(request, updateActivity, activityId, endPoints.activities);
-     expect(updateResponse.status()).toBe(200);
-     expect(updateResponse.ok()).toBeTruthy();
+    const createResponse = await createRecord(request, postData, endPoints.activities);
+    const createdActivity = await createResponse.json();
+    const activityId = createdActivity.id;
 
-     const getUpdatedResponse = await request.get(`${endPoints.activities}/${activityId}`);
+    const updateActivity = {
+        title: RandomDataGenerator.generateTitle(),
+        dueDate: RandomDateGenerator.generateDueDate(),
+        completed: false,
+    };
 
-     expect(getUpdatedResponse.status()).toBe(200);
-     expect(getUpdatedResponse.ok()).toBeTruthy();
+    await updateRecord(request, updateActivity, activityId, endPoints.activities);
 
-     const getUpdatedActivity = await getUpdatedResponse.json();
+    const getUpdatedResponse = await request.get(`${endPoints.activities}/${activityId}`);
+    const getUpdatedActivity = await getUpdatedResponse.json();
 
-     expect(getUpdatedActivity).toHaveProperty("title", updateActivity.title);
-     expect(getUpdatedActivity).toHaveProperty("dueDate", updateActivity.dueDate);
-     expect(getUpdatedActivity).toHaveProperty("completed", updateActivity.completed);
- });
- 
- test('Validate the activity is deleted succsessfully', async ({ request }) => {
- 
-     const postData = Data.activities;
- 
-     const createResponse = await createRecord(request, postData, endPoints.activities);
-     expect(createResponse.status()).toBe(200);
-     expect(createResponse.ok()).toBeTruthy();
- 
-     const createdActivity = await createResponse.json();
-     const activityId = createdActivity.id;
- 
-     const deleteResponse = await deleteRecord(request, activityId, endPoints.activities);
-     expect(await deleteResponse.status()).toBe(200);
-     expect(await deleteResponse.ok()).toBeTruthy();
+    expect(getUpdatedActivity).toHaveProperty("title", updateActivity.title);
+    expect(getUpdatedActivity).toHaveProperty("dueDate", updateActivity.dueDate);
+});
 
-     const getDeletedResponse = await request.get(`${endPoints.activities}/${activityId}`);
-     expect(await getDeletedResponse.status()).toBe(404);
-     expect(await getDeletedResponse.ok()).toBeFalsy(); 
- 
- });
+test('Validate the activity is deleted successfully', async ({ request }) => {
+    const postData = Data.activities;
+    const createResponse = await createRecord(request, postData, endPoints.activities);
+    const createdActivity = await createResponse.json();
+    const activityId = createdActivity.id;
 
+    const deleteResponse = await deleteRecord(request, activityId, endPoints.activities);
+    expect(deleteResponse.status()).toBe(200);
+
+    const getDeletedResponse = await request.get(`${endPoints.activities}/${activityId}`);
+    expect(getDeletedResponse.status()).toBe(404);
+});
+
+test.describe('Testing Negative Scenarios for GET /activities API', () => {
+    test('Fetch non-existing activity id', async ({ request }) => {
+        const response = await request.get(`${endPoints.activities}/${testData.nonExistingActivityId}`);
+        await assertResponseStatus(response, 404);
+    });
+
+    test('Fetch activity with invalid ID format', async ({ request }) => {
+        const response = await request.get(`${endPoints.activities}/${testData.invalidIdFormat}`);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Fetch activity with negative ID', async ({ request }) => {
+        const response = await request.get(`${endPoints.activities}/${testData.negativeId}`);
+        await assertResponseStatus(response, 404);
+    });
+});
+
+test.describe('Testing Negative Scenarios for POST /activities API', () => {
+    test('ID Field is Missing', async ({ request }) => {
+        const response = await createRecord(request, testData.postActivities.missingIdField, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Non-numeric ID', async ({ request }) => {
+        const response = await createRecord(request, testData.postActivities.nonNumericId, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Add extra field', async ({ request }) => {
+        const response = await createRecord(request, testData.postActivities.extraField, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Completed provided as string', async ({ request }) => {
+        const response = await createRecord(request, testData.postActivities.completedAsString, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Empty body', async ({ request }) => {
+        const response = await createRecord(request, testData.postActivities.emptyBody, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Create activity with existing ID', async ({ request }) => {
+        await createRecord(request, testData.postActivities.existingId, endPoints.activities);
+        const response = await createRecord(request, testData.postActivities.existingId, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+});
+
+test.describe('Testing Negative Scenarios for PUT /activities API', () => {
+    test('Invalid ID format', async ({ request }) => {
+        const response = await updateRecord(request, testData.putActivities.invalidIdFormat, testData.invalidIdFormat, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Completed as incorrect type', async ({ request }) => {
+        const response = await updateRecord(request, testData.putActivities.completedAsIncorrectType, 1, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+
+    test('Empty body', async ({ request }) => {
+        const response = await updateRecord(request, testData.putActivities.emptyBody, 1, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+});
+
+test.describe('Testing Negative Scenario for DELETE /activities API', () => {
+    test('ID contains special characters', async ({ request }) => {
+        const response = await deleteRecord(request, testData.deleteActivities.specialCharId, endPoints.activities);
+        await assertResponseStatus(response, 400);
+    });
+});

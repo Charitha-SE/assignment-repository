@@ -5,7 +5,7 @@ const{ Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 const RandomDateGenerator = require('../helpers/dateHelper.js');
 
-const endPoints = new ApiEndpoints().getEndPoints();
+const endPoints = new ApiEndpoints();
 
 test('Validate the books list getting successfully', async ({ request }) => {
     const response = await getAllRecords(request, endPoints.books);

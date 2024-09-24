@@ -1,10 +1,11 @@
 const { test, expect } = require('@playwright/test');
 const { createRecord, getAllRecords, updateRecord, deleteRecord } = require('../helpers/requestMethods.js');
-const ApiEndpoints  = require('../Constants/EndPoint.js');
+const ApiEndpoints = require('../Constants/EndPoint.js');
 const { Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 
-const endPoints = new ApiEndpoints().getEndPoints();
+
+const endPoints = new ApiEndpoints();
 
 
 test('Validate the authors list getting successfully', async ({ request }) => {

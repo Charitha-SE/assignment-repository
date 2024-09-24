@@ -1,23 +1,11 @@
-const { use } = require("../playwright.config");
-
 class ApiEndpoints {
     constructor() {
-        this.baseURL = use.baseURL;
-        this.activitiesEndPoint = `${this.baseURL}/Activities`;
-        this.authorsEndPoint = `${this.baseURL}/Authors`;
-        this.booksEndPoint = `${this.baseURL}/Books`;
-        this.coverPhotosEndPoint = `${this.baseURL}/CoverPhotos`;
-        this.usersEndPoint = `${this.baseURL}/Users`;
-    }
-
-    getEndPoints() {
-        return {
-            activities: this.activitiesEndPoint,
-            authors: this.authorsEndPoint,
-            books: this.booksEndPoint,
-            coverPhotos: this.coverPhotosEndPoint,
-            users: this.usersEndPoint
-        };
+        this.baseURL = 'https://fakerestapi.azurewebsites.net/api/v1';
+        this.activities = `${baseURL}/Activities`;
+        this.authors = `${baseURL}/Authors`;
+        this.books = `${baseURL}/Books`;
+        this.coverPhotos = `${baseURL}/CoverPhotos`;
+        this.users = `${baseURL}/Users`;
     }
 }
 
