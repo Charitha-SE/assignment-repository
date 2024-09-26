@@ -91,9 +91,9 @@ test('Validate the activity is deleted successfully', async ({ request }) => {
     expect(getDeletedResponse.status()).toBe(404);
 });
 
-const executeApiTest = (testCaseDescription, requestFunc, data, expectedStatus) => {
+const executeApiTest = (testCaseDescription, requestMethod, data, expectedStatus) => {
     test(testCaseDescription, async ({ request }) => {
-        const response = await requestFunc(request, data, endPoints.activities);
+        const response = await requestMethod(request, data, endPoints.activities);
         await assertResponseStatus(response, expectedStatus);
     });
 };
