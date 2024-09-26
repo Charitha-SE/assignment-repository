@@ -12,7 +12,6 @@ const endPoints = new ApiEndpoint();
 test('Validate the activity list is retrieved successfully', async ({ request }) => {
     const response = await getAllRecords(request, endPoints.activities);
     expect(response.status()).toBe(200);
-    expect(response.ok()).toBeTruthy();
 });
 
 test('Validate the activity is created successfully', async ({ request }) => {
@@ -20,7 +19,6 @@ test('Validate the activity is created successfully', async ({ request }) => {
     const postAPIResponse = await createRecord(request, postData, endPoints.activities);
 
     expect(postAPIResponse.status()).toBe(200);
-    expect(postAPIResponse.ok()).toBeTruthy();
 
     const postAPIResponseBody = await postAPIResponse.json();
     expect(postAPIResponseBody).toHaveProperty("id", postData.id);
@@ -33,16 +31,13 @@ test('Validate activity creation and retrieval by ID', async ({ request }) => {
     const postAPIResponse = await createRecord(request, postData, endPoints.activities);
 
     expect(postAPIResponse.status()).toBe(200);
-    expect(postAPIResponse.ok()).toBeTruthy();
 
     const postAPIResponseBody = await postAPIResponse.json();
     const createdActivityId = postAPIResponseBody.id;
-    
+
     const getAPIResponse = await request.get(`${endPoints.activities}/${createdActivityId}`);
     expect(getAPIResponse.status()).toBe(200);
-    expect(getAPIResponse.ok()).toBeTruthy();
 });
-
 
 test('Validate the activity is updated successfully', async ({ request }) => {
     const postData = Data.activities;
@@ -96,10 +91,9 @@ test('Validate the activity is deleted successfully', async ({ request }) => {
     expect(getDeletedResponse.status()).toBe(404);
 });
 
-const executeApiTest = (testCaseDescription, requestMethod, data, expectedStatus) => {
+const executeApiTest = (testCaseDescription, requestFunc, data, expectedStatus) => {
     test(testCaseDescription, async ({ request }) => {
-        const requestData = JSON.stringify(data);
-        const response = await requestMethod(request, requestData, endPoints.activities);
+        const response = await requestFunc(request, data, endPoints.activities);
         await assertResponseStatus(response, expectedStatus);
     });
 };
@@ -116,15 +110,19 @@ test.describe('Testing Negative Scenarios for POST /activities API', () => {
     executeApiTest('Add extra field', createRecord, testData.extraField, 400);
     executeApiTest('Completed provided as string', createRecord, testData.completedAsString, 400);
     executeApiTest('Empty body', createRecord, testData.emptyBody, 400);
-    executeApiTest('Create activity with existing ID', createRecord, testData.existingId, 400);
+
+    const existingActivityData = testData.existingId;
+    executeApiTest('Create activity with existing ID', createRecord, existingActivityData, 400);
 });
 
 test.describe('Testing Negative Scenarios for PUT /activities API', () => {
-    executeApiTest('Invalid ID format', updateRecord, testData.invalidIdFormat, 400, testData.invalidIdFormat);
-    executeApiTest('Completed as incorrect type', updateRecord, testData.completedAsIncorrectType, 400, 1);
-    executeApiTest('Empty body', updateRecord, testData.emptyBody, 400, 1);
+    executeApiTest('Invalid ID format', updateRecord, testData.invalidIdFormat, 400);
+    executeApiTest('Completed as incorrect type', updateRecord, testData.completedAsIncorrectType, 400);
+    executeApiTest('Empty body', updateRecord, testData.emptyBody, 400);
 });
+
 
 test.describe('Testing Negative Scenario for DELETE /activities API', () => {
     executeApiTest('ID contains special characters', deleteRecord, testData.specialCharId, 400);
 });
+
