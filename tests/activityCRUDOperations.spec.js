@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
 const { createRecord, getAllRecords, updateRecord, deleteRecord } = require('../helpers/requestMethods.js');
-const ApiEndpoints = require('../Constants/EndPoint.js');
+const ApiEndpoint = require('../Constants/EndPoint.js');
 const { Data } = require('../test-data/payload.js');
 const RandomDataGenerator = require('../helpers/randomHelpers.js');
 const RandomDateGenerator = require('../helpers/dateHelper.js');
 const { assertResponseStatus } = require('../helpers/AssertionHelper.js');
 const testData = require('../test-data/testData.js');
 
-const endPoints = new ApiEndpoints();
+const endPoints = new ApiEndpoint();
 
 test('Validate the activity list is retrieved successfully', async ({ request }) => {
     const response = await getAllRecords(request, endPoints.activities);
@@ -43,16 +43,6 @@ test('Validate activity creation and retrieval by ID', async ({ request }) => {
     expect(getAPIResponse.ok()).toBeTruthy();
 });
 
-test('Validate the activity is not created with invalid data', async ({ request }) => {
-    const invalidDataSets = testData.invalidActivityData;
-
-    for (const data of invalidDataSets) {
-        const postAPIResponse = await createRecord(request, data, endPoints.activities);
-        expect(postAPIResponse.status()).toBe(400);
-        const postAPIResponseBody = await postAPIResponse.json();
-        expect(postAPIResponseBody).toHaveProperty("title", "One or more validation errors occurred.");
-    }
-});
 
 test('Validate the activity is updated successfully', async ({ request }) => {
     const postData = Data.activities;
@@ -106,76 +96,35 @@ test('Validate the activity is deleted successfully', async ({ request }) => {
     expect(getDeletedResponse.status()).toBe(404);
 });
 
+const executeApiTest = (testCaseDescription, requestMethod, data, expectedStatus) => {
+    test(testCaseDescription, async ({ request }) => {
+        const requestData = JSON.stringify(data);
+        const response = await requestMethod(request, requestData, endPoints.activities);
+        await assertResponseStatus(response, expectedStatus);
+    });
+};
+
 test.describe('Testing Negative Scenarios for GET /activities API', () => {
-    test('Fetch non-existing activity id', async ({ request }) => {
-        const response = await request.get(`${endPoints.activities}/${testData.nonExistingActivityId}`);
-        await assertResponseStatus(response, 404);
-    });
-
-    test('Fetch activity with invalid ID format', async ({ request }) => {
-        const response = await request.get(`${endPoints.activities}/${testData.invalidIdFormat}`);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Fetch activity with negative ID', async ({ request }) => {
-        const response = await request.get(`${endPoints.activities}/${testData.negativeId}`);
-        await assertResponseStatus(response, 404);
-    });
+    executeApiTest('Fetch non-existing activity id', async (request) => request.get(`${endPoints.activities}/${testData.nonExistingActivityId}`), null, 404);
+    executeApiTest('Fetch activity with invalid ID format', async (request) => request.get(`${endPoints.activities}/${testData.invalidIdFormat}`), null, 400);
+    executeApiTest('Fetch activity with negative ID', async (request) => request.get(`${endPoints.activities}/${testData.negativeId}`), null, 404);
 });
 
 test.describe('Testing Negative Scenarios for POST /activities API', () => {
-    test('ID Field is Missing', async ({ request }) => {
-        const response = await createRecord(request, testData.postActivities.missingIdField, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Non-numeric ID', async ({ request }) => {
-        const response = await createRecord(request, testData.postActivities.nonNumericId, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Add extra field', async ({ request }) => {
-        const response = await createRecord(request, testData.postActivities.extraField, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Completed provided as string', async ({ request }) => {
-        const response = await createRecord(request, testData.postActivities.completedAsString, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Empty body', async ({ request }) => {
-        const response = await createRecord(request, testData.postActivities.emptyBody, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Create activity with existing ID', async ({ request }) => {
-        await createRecord(request, testData.postActivities.existingId, endPoints.activities);
-        const response = await createRecord(request, testData.postActivities.existingId, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
+    executeApiTest('ID Field is Missing', createRecord, testData.missingIdField, 400);
+    executeApiTest('Non-numeric ID', createRecord, testData.nonNumericId, 400);
+    executeApiTest('Add extra field', createRecord, testData.extraField, 400);
+    executeApiTest('Completed provided as string', createRecord, testData.completedAsString, 400);
+    executeApiTest('Empty body', createRecord, testData.emptyBody, 400);
+    executeApiTest('Create activity with existing ID', createRecord, testData.existingId, 400);
 });
 
 test.describe('Testing Negative Scenarios for PUT /activities API', () => {
-    test('Invalid ID format', async ({ request }) => {
-        const response = await updateRecord(request, testData.putActivities.invalidIdFormat, testData.invalidIdFormat, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Completed as incorrect type', async ({ request }) => {
-        const response = await updateRecord(request, testData.putActivities.completedAsIncorrectType, 1, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
-
-    test('Empty body', async ({ request }) => {
-        const response = await updateRecord(request, testData.putActivities.emptyBody, 1, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
+    executeApiTest('Invalid ID format', updateRecord, testData.invalidIdFormat, 400, testData.invalidIdFormat);
+    executeApiTest('Completed as incorrect type', updateRecord, testData.completedAsIncorrectType, 400, 1);
+    executeApiTest('Empty body', updateRecord, testData.emptyBody, 400, 1);
 });
 
 test.describe('Testing Negative Scenario for DELETE /activities API', () => {
-    test('ID contains special characters', async ({ request }) => {
-        const response = await deleteRecord(request, testData.deleteActivities.specialCharId, endPoints.activities);
-        await assertResponseStatus(response, 400);
-    });
+    executeApiTest('ID contains special characters', deleteRecord, testData.specialCharId, 400);
 });

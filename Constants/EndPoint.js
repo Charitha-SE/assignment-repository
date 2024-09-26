@@ -1,6 +1,6 @@
-class ApiEndpoints {
+class ApiEndpoint {
     constructor() {
-        this.baseURL = 'https://fakerestapi.azurewebsites.net/api/v1';
+        let baseURL = 'https://fakerestapi.azurewebsites.net/api/v1';
         this.activities = `${baseURL}/Activities`;
         this.authors = `${baseURL}/Authors`;
         this.books = `${baseURL}/Books`;
@@ -9,4 +9,4 @@ class ApiEndpoints {
     }
 }
 
-module.exports = ApiEndpoints;
+module.exports = ApiEndpoint;
